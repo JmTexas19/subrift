@@ -9,6 +9,7 @@ from authentication import generateHash, generateSalt
 with open("subrift.json", "r") as read_file:
     data = json.load(read_file)
 
+hostname = data["SUBSONICSERVER"]["HOST"]
 username = data["USER"]["USERNAME"]
 password = data["USER"]["PASSWORD"]
 
@@ -29,6 +30,13 @@ class songInfo:
         self.album = album
         self.coverArt = coverArt
 
+class albumInfo:
+    def __init__(self, id, title, artist, coverArt):
+        self.id = id
+        self.title = title
+        self.artist = artist
+        self.coverArt = coverArt
+
 class playlistInfo:
     def __init__(self, id, title):
         self.id = id
@@ -37,7 +45,7 @@ class playlistInfo:
 #(string) Pings the server to test if online
 def pingServer():
     #Test Request URL
-    URL = 'http://cptg.dev/rest/ping'
+    URL = hostname + '/rest/ping'
 
     #Parameters
     PARAMS = {
@@ -60,7 +68,7 @@ def pingServer():
 #(string) Returns whether the license is valid
 def getLicense():
     #Test Request URL
-    URL = 'http://cptg.dev/rest/getLicense'
+    URL = hostname + '/rest/getLicense'
 
     #Parameters
     PARAMS = {
@@ -81,7 +89,7 @@ def getLicense():
 #(xml) Returns xml object containing music folders
 def getMusicFolders():
     #Test Request URL
-    URL = 'http://cptg.dev/rest/getMusicFolders'
+    URL = hostname + '/rest/getMusicFolders'
 
     #Parameters
     PARAMS = {
@@ -110,7 +118,7 @@ def printMusicFolders():
 #(xml) Returns xml object containing indexes
 def getIndexes():
     #Test Request URL
-    URL = 'http://cptg.dev/rest/getIndexes'
+    URL = hostname + '/rest/getIndexes'
 
     #Parameters
     PARAMS = {
@@ -127,7 +135,7 @@ def getIndexes():
 #(xml) Returns xml object containing music directory when given id
 def getMusicDirectory(id):
     #Test Request URL
-    URL = 'http://cptg.dev/rest/getMusicDirectory'
+    URL = hostname + '/rest/getMusicDirectory'
 
     #Parameters
     PARAMS = {
@@ -145,7 +153,7 @@ def getMusicDirectory(id):
 #(xml) Returns xml object containing search results
 def search(query):
     #Test Request URL
-    URL = 'http://cptg.dev/rest/search3'
+    URL = hostname + '/rest/search3'
 
     #Parameters
     PARAMS = {
@@ -163,7 +171,7 @@ def search(query):
 #(binary) Returns request containing song data
 def streamSong(id):
     #Test Request URL
-    URL = 'http://cptg.dev/rest/stream'
+    URL = hostname + '/rest/stream'
 
     #Parameters
     PARAMS = {
@@ -181,7 +189,7 @@ def streamSong(id):
 #(binary) Returns request containing raw song data
 def downloadSong(id):
     #Test Request URL
-    URL = 'http://cptg.dev/rest/stream'
+    URL = hostname + '/rest/stream'
 
     #Parameters
     PARAMS = {
@@ -228,13 +236,45 @@ def getSong(query):
             #Create object & break
             song = songInfo(song_id, title, artist, album, coverArt)
             break
-    
+
     return song
+
+#(binary) Searches album given query and returns the album
+def getAlbum(query):
+    #Query album & save xml response into root
+    root = ET.fromstring(search(query).text)
+
+    #Create albumInfo object that will hold song information
+    album = None
+
+    #Grab first song
+    for result in root.findall("sub:searchResult3", namespaces=ns):
+        #Get FIRST song result
+        for album in result.findall("sub:album", namespaces=ns):
+            #Check for empty attributes
+            album_id = ''
+            title = ''
+            artist = ''
+            coverArt = ''
+            if 'id' in album.attrib:
+                album_id = album.attrib["id"]
+            if 'name' in album.attrib:
+                title = album.attrib["name"]
+            if 'artist' in album.attrib:
+                artist = album.attrib["artist"]
+            if 'coverArt' in album.attrib:
+                coverArt = album.attrib["coverArt"]
+
+            #Create object & break
+            album = albumInfo(album_id, title, artist, coverArt)
+            break
+
+    return album
 
 #(binary) Returns request containing raw song data
 def getCoverArt(id):
     #Test Request URL
-    URL = 'http://cptg.dev/rest/getCoverArt'
+    URL = hostname + '/rest/getCoverArt'
 
     #Parameters
     PARAMS = {
@@ -254,7 +294,7 @@ def getCoverArt(id):
 def getSearchResults(query):
     #Query song and save xml response into root
     root = ET.fromstring(search(query).text)
-    
+
     #Take all results from list as songInfo objects
     songInfoList = []
     for result in root.findall("sub:searchResult3", namespaces=ns):
@@ -280,13 +320,61 @@ def getSearchResults(query):
 
             #Create Object and Append
             songInfoList.append(songInfo(song_id, title, artist, album, coverArt))
-    
+
     return songInfoList
+
+#(binary) Returns a listing of songs in an album.
+def getAlbumData(id):
+    #Test Request URL
+    URL = hostname + '/rest/getAlbum'
+
+    #Parameters
+    PARAMS = {
+        "u" : username,
+        "t" : token,
+        "s" : salt,
+        "v" : '1.15.0',
+        "c" : client,
+        "id": id
+    }
+
+    #Send Request and Parse XML
+    result = requests.get(url = URL, params = PARAMS)
+    root = ET.fromstring(result.text)
+
+    #Put All Songs in List
+    songInfoList = []
+    for album in root.findall("sub:album", namespaces=ns):
+        for entry in album.findall("sub:song", namespaces=ns):
+            #Check for empty attributes
+            song_id = ''
+            title = ''
+            artist = ''
+            album = ''
+            coverArt = ''
+            if 'id' in entry.attrib:
+                song_id = entry.attrib["id"]
+            else:
+                continue
+            if 'title' in entry.attrib:
+                title = entry.attrib["title"]
+            if 'artist' in entry.attrib:
+                artist = entry.attrib["artist"]
+            if 'album' in entry.attrib:
+                album = entry.attrib["album"]
+            if 'coverArt' in entry.attrib:
+                coverArt = entry.attrib["coverArt"]
+
+            #Create Object and Append
+            songInfoList.append(songInfo(song_id, title, artist, album, coverArt))
+
+    return songInfoList
+
 
 #(binary) Returns a listing of files in a saved playlist.
 def getPlaylistData(id):
     #Test Request URL
-    URL = 'http://cptg.dev/rest/getPlaylist'
+    URL = hostname + '/rest/getPlaylist'
 
     #Parameters
     PARAMS = {
@@ -329,13 +417,13 @@ def getPlaylistData(id):
             songInfoList.append(songInfo(song_id, title, artist, album, coverArt))
 
     return songInfoList
-  
+
 
 #(playlistInfo) Returns list of playlist
 def getPlaylist(query):
 
     #Test Request URL
-    URL = 'http://cptg.dev/rest/getPlaylists'
+    URL = hostname + '/rest/getPlaylists'
 
     #Parameters
     PARAMS = {
@@ -356,6 +444,6 @@ def getPlaylist(query):
             #Match and Return Playlist with Song Objects
             if(playlist.attrib["name"] == query):
                 return getPlaylistData(playlist.attrib['id'])
-            
+
         #No Results
         return None

@@ -63,6 +63,7 @@ client = commands.Bot(command_prefix='s!')
 with open("subrift.json", "r") as read_file:
     data = json.load(read_file)
 
+HOSTNAME = data["SUBSONICSERVER"]["HOST"]
 TOKEN = data["USER"]["TOKEN"]
 
 #Logs Bot in
@@ -118,7 +119,7 @@ async def play(ctx, option: typing.Optional[int] = None, *, query):
     else:
         #Join channel if not already in one
         if not client.voice_clients:
-            vc = await (ctx.author.voice.channel).connect()
+            vc = await ctx.author.voice.channel.connect()
         else:
             vc = client.voice_clients[0]
 
@@ -152,6 +153,47 @@ async def playSong(ctx, vc, song):
 async def play_error(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
         await ctx.send('Try `play [song-title]`')
+
+@client.command()
+async def playalbum(ctx, option: typing.Optional[int] = None, *, query):
+    #Check if author is NOT in voice chat
+    if ctx.author.voice is None:
+        await ctx.send("You need to join a voice channel first.")
+        return
+
+    else:
+        #Join channel if not already in one
+        if not client.voice_clients:
+            vc = await (ctx.author.voice.channel).connect()
+        else:
+            vc = client.voice_clients[0]
+
+        #Stop Current Song & Clear Queue
+        if vc.is_playing() == True:
+            vc.stop()
+            clearQueue()
+            serverQueue.clear()
+
+        #Get Playlist Info
+        album = api.getAlbumData(api.getAlbum(query).id)
+
+        #Check if Empty
+        if album is not None:
+
+            #Shuffle if -s Given
+            if option == 1:
+                random.shuffle(playlist)
+
+            #Populate Songs Queue
+            for entry in album:
+                await playSong(ctx, vc, entry)
+
+            #Place all but current in Queue
+            album.pop(0)
+            for entry in album:
+                serverQueue.append(entry)
+        else:
+            await ctx.send('Album Not Found. Enter Exact Name')
 
 #Stop Song
 @client.command()
@@ -210,7 +252,7 @@ async def search(ctx, *, query):
             title = 'Search Results',
             color = discord.Color.orange()
         )
-        embed.set_footer(text='https://cptg.dev')
+        embed.set_footer(text=HOSTNAME)
         embed.set_author(name='SubRift')
         embed.set_thumbnail(url='https://cdn.discordapp.com/avatars/699752709028446259/df9496def162ef55bcaa9a2005c75ab2.png?size=256')
 
@@ -232,7 +274,7 @@ async def queue(ctx):
         title = 'Queue',
         color = discord.Color.orange()
     )
-    embed.set_footer(text='https://cptg.dev')
+    embed.set_footer(text=HOSTNAME)
     embed.set_author(name='SubRift')
     embed.set_thumbnail(url='https://cdn.discordapp.com/avatars/699752709028446259/df9496def162ef55bcaa9a2005c75ab2.png?size=256')
 
