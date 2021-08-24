@@ -1,3 +1,2 @@
-discord.py
-PyNaCl
+discord.py[voice]
 requests
