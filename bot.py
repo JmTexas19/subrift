@@ -128,23 +128,23 @@ async def play(ctx, option: typing.Optional[int] = None, *, query):
             if option == 1:
                 vc.stop()
                 clearQueue()
-                serverQueue.clear()               
-        
+                serverQueue.clear()
+
         #Add to Queue & Play Song
-        song = api.getSong(query)       
+        song = api.getSong(query)
         if song is not None:
             serverQueue.append(song)
             await ctx.send('Added to Queue')
             await playSong(ctx, vc, song)
         else:
             await ctx.send("Song Doesn't Exist")
-        
+
 #Play Song
 async def playSong(ctx, vc, song):
     if song is not None:
         #Create Player & Place in queue
         player = Player(ctx, vc, song)
-        await songs.put(player)     
+        await songs.put(player)
     else:
         await ctx.send("Does not exist")
 
@@ -192,7 +192,7 @@ async def resume(ctx):
         else:
             await ctx.channel.send('Song is already playing')
     else:
-        await ctx.channel.send('Plug me in')    
+        await ctx.channel.send('Plug me in')
 
 #Search Server
 @client.command()
@@ -204,7 +204,7 @@ async def search(ctx, *, query):
     else:
         #Get Search Results
         songInfoList = api.getSearchResults(query)
-        
+
         #Embed Message
         embed = discord.Embed(
             title = 'Search Results',
@@ -213,11 +213,11 @@ async def search(ctx, *, query):
         embed.set_footer(text='https://cptg.dev')
         embed.set_author(name='SubRift')
         embed.set_thumbnail(url='https://cdn.discordapp.com/avatars/699752709028446259/df9496def162ef55bcaa9a2005c75ab2.png?size=256')
-        
+
         #Add Field for every song
         for song in songInfoList:
             embed.add_field(
-                name=str(song.id), 
+                name=str(song.id),
                 value='{0} - {1}'.format(song.title, song.artist),
                 inline=False
             )
@@ -235,12 +235,12 @@ async def queue(ctx):
     embed.set_footer(text='https://cptg.dev')
     embed.set_author(name='SubRift')
     embed.set_thumbnail(url='https://cdn.discordapp.com/avatars/699752709028446259/df9496def162ef55bcaa9a2005c75ab2.png?size=256')
-    
+
     #Add Field for every song
     count = 1
     for song in serverQueue:
         embed.add_field(
-            name=count, 
+            name=count,
             value='{0} - {1}'.format(song.title, song.artist),
             inline=False
         )
@@ -287,17 +287,17 @@ async def playlist(ctx, option: typing.Optional[int] = None, *, query):
             vc.stop()
             clearQueue()
             serverQueue.clear()
-        
+
         #Get Playlist Info
         playlist = api.getPlaylist(query)
 
         #Check if Empty
         if playlist is not None:
-            
+
             #Shuffle if -s Given
             if option == 1:
                 random.shuffle(playlist)
-            
+
             #Populate Songs Queue
             for entry in playlist:
                 await playSong(ctx, vc, entry)
@@ -321,8 +321,8 @@ async def shuffle(ctx):
         #Check Queue is not empty
         if len(serverQueue) == 0:
             await ctx.send("Queue is empty")
-        
-        else:       
+
+        else:
             #Shuffle Service Queue
             random.shuffle(serverQueue)
 
@@ -334,7 +334,7 @@ async def shuffle(ctx):
 
             #Clear Current Queue
             clearQueue()
-            
+
             #Populate Queue
             for entry in serverQueue:
                 await playSong(ctx, vc, entry)
