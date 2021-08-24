@@ -30,6 +30,13 @@ class songInfo:
         self.album = album
         self.coverArt = coverArt
 
+class albumInfo:
+    def __init__(self, id, title, artist, coverArt):
+        self.id = id
+        self.title = title
+        self.artist = artist
+        self.coverArt = coverArt
+
 class playlistInfo:
     def __init__(self, id, title):
         self.id = id
@@ -229,8 +236,40 @@ def getSong(query):
             #Create object & break
             song = songInfo(song_id, title, artist, album, coverArt)
             break
-    
+
     return song
+
+#(binary) Searches album given query and returns the album
+def getAlbum(query):
+    #Query album & save xml response into root
+    root = ET.fromstring(search(query).text)
+
+    #Create albumInfo object that will hold song information
+    album = None
+
+    #Grab first song
+    for result in root.findall("sub:searchResult3", namespaces=ns):
+        #Get FIRST song result
+        for album in result.findall("sub:album", namespaces=ns):
+            #Check for empty attributes
+            album_id = ''
+            title = ''
+            artist = ''
+            coverArt = ''
+            if 'id' in album.attrib:
+                album_id = album.attrib["id"]
+            if 'name' in album.attrib:
+                title = album.attrib["name"]
+            if 'artist' in album.attrib:
+                artist = album.attrib["artist"]
+            if 'coverArt' in album.attrib:
+                coverArt = album.attrib["coverArt"]
+
+            #Create object & break
+            album = albumInfo(album_id, title, artist, coverArt)
+            break
+
+    return album
 
 #(binary) Returns request containing raw song data
 def getCoverArt(id):
@@ -255,7 +294,7 @@ def getCoverArt(id):
 def getSearchResults(query):
     #Query song and save xml response into root
     root = ET.fromstring(search(query).text)
-    
+
     #Take all results from list as songInfo objects
     songInfoList = []
     for result in root.findall("sub:searchResult3", namespaces=ns):
@@ -281,8 +320,56 @@ def getSearchResults(query):
 
             #Create Object and Append
             songInfoList.append(songInfo(song_id, title, artist, album, coverArt))
-    
+
     return songInfoList
+
+#(binary) Returns a listing of songs in an album.
+def getAlbumData(id):
+    #Test Request URL
+    URL = url + '/rest/getAlbum'
+
+    #Parameters
+    PARAMS = {
+        "u" : username,
+        "t" : token,
+        "s" : salt,
+        "v" : '1.15.0',
+        "c" : client,
+        "id": id
+    }
+
+    #Send Request and Parse XML
+    result = requests.get(url = URL, params = PARAMS)
+    root = ET.fromstring(result.text)
+
+    #Put All Songs in List
+    songInfoList = []
+    for album in root.findall("sub:album", namespaces=ns):
+        for entry in album.findall("sub:song", namespaces=ns):
+            #Check for empty attributes
+            song_id = ''
+            title = ''
+            artist = ''
+            album = ''
+            coverArt = ''
+            if 'id' in entry.attrib:
+                song_id = entry.attrib["id"]
+            else:
+                continue
+            if 'title' in entry.attrib:
+                title = entry.attrib["title"]
+            if 'artist' in entry.attrib:
+                artist = entry.attrib["artist"]
+            if 'album' in entry.attrib:
+                album = entry.attrib["album"]
+            if 'coverArt' in entry.attrib:
+                coverArt = entry.attrib["coverArt"]
+
+            #Create Object and Append
+            songInfoList.append(songInfo(song_id, title, artist, album, coverArt))
+
+    return songInfoList
+
 
 #(binary) Returns a listing of files in a saved playlist.
 def getPlaylistData(id):
@@ -330,7 +417,7 @@ def getPlaylistData(id):
             songInfoList.append(songInfo(song_id, title, artist, album, coverArt))
 
     return songInfoList
-  
+
 
 #(playlistInfo) Returns list of playlist
 def getPlaylist(query):
@@ -357,6 +444,6 @@ def getPlaylist(query):
             #Match and Return Playlist with Song Objects
             if(playlist.attrib["name"] == query):
                 return getPlaylistData(playlist.attrib['id'])
-            
+
         #No Results
         return None
