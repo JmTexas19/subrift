@@ -10,7 +10,8 @@ with open("subrift.json", "r") as read_file:
     data = json.load(read_file)
 
 username = data["USER"]["USERNAME"]
-password = data["USER"]["PASSWORD"]
+password = data["USER"]["SUBSONICPASSWORD"]
+url = data["URL"]
 
 #Generate Salt, Client, & Hash
 salt = generateSalt()
@@ -37,7 +38,7 @@ class playlistInfo:
 #(string) Pings the server to test if online
 def pingServer():
     #Test Request URL
-    URL = 'http://cptg.dev/rest/ping'
+    URL = url + '/rest/ping'
 
     #Parameters
     PARAMS = {
@@ -60,7 +61,7 @@ def pingServer():
 #(string) Returns whether the license is valid
 def getLicense():
     #Test Request URL
-    URL = 'http://cptg.dev/rest/getLicense'
+    URL = url + '/rest/getLicense'
 
     #Parameters
     PARAMS = {
@@ -81,7 +82,7 @@ def getLicense():
 #(xml) Returns xml object containing music folders
 def getMusicFolders():
     #Test Request URL
-    URL = 'http://cptg.dev/rest/getMusicFolders'
+    URL = url + '/rest/getMusicFolders'
 
     #Parameters
     PARAMS = {
@@ -110,7 +111,7 @@ def printMusicFolders():
 #(xml) Returns xml object containing indexes
 def getIndexes():
     #Test Request URL
-    URL = 'http://cptg.dev/rest/getIndexes'
+    URL = url + '/rest/getIndexes'
 
     #Parameters
     PARAMS = {
@@ -127,7 +128,7 @@ def getIndexes():
 #(xml) Returns xml object containing music directory when given id
 def getMusicDirectory(id):
     #Test Request URL
-    URL = 'http://cptg.dev/rest/getMusicDirectory'
+    URL = url + '/rest/getMusicDirectory'
 
     #Parameters
     PARAMS = {
@@ -145,7 +146,7 @@ def getMusicDirectory(id):
 #(xml) Returns xml object containing search results
 def search(query):
     #Test Request URL
-    URL = 'http://cptg.dev/rest/search3'
+    URL = url + '/rest/search3'
 
     #Parameters
     PARAMS = {
@@ -163,7 +164,7 @@ def search(query):
 #(binary) Returns request containing song data
 def streamSong(id):
     #Test Request URL
-    URL = 'http://cptg.dev/rest/stream'
+    URL = url + '/rest/stream'
 
     #Parameters
     PARAMS = {
@@ -181,7 +182,7 @@ def streamSong(id):
 #(binary) Returns request containing raw song data
 def downloadSong(id):
     #Test Request URL
-    URL = 'http://cptg.dev/rest/stream'
+    URL = url + '/rest/stream'
 
     #Parameters
     PARAMS = {
@@ -234,7 +235,7 @@ def getSong(query):
 #(binary) Returns request containing raw song data
 def getCoverArt(id):
     #Test Request URL
-    URL = 'http://cptg.dev/rest/getCoverArt'
+    URL = url + '/rest/getCoverArt'
 
     #Parameters
     PARAMS = {
@@ -286,7 +287,7 @@ def getSearchResults(query):
 #(binary) Returns a listing of files in a saved playlist.
 def getPlaylistData(id):
     #Test Request URL
-    URL = 'http://cptg.dev/rest/getPlaylist'
+    URL = url + '/rest/getPlaylist'
 
     #Parameters
     PARAMS = {
@@ -335,7 +336,7 @@ def getPlaylistData(id):
 def getPlaylist(query):
 
     #Test Request URL
-    URL = 'http://cptg.dev/rest/getPlaylists'
+    URL = url + '/rest/getPlaylists'
 
     #Parameters
     PARAMS = {

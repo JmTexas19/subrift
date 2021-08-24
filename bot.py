@@ -63,7 +63,7 @@ client = commands.Bot(command_prefix='s!')
 with open("subrift.json", "r") as read_file:
     data = json.load(read_file)
 
-TOKEN = data["USER"]["TOKEN"]
+TOKEN = data["DISCORDTOKEN"]
 
 #Logs Bot in
 @client.event
@@ -118,7 +118,8 @@ async def play(ctx, option: typing.Optional[int] = None, *, query):
     else:
         #Join channel if not already in one
         if not client.voice_clients:
-            vc = await (ctx.author.voice.channel).connect()
+            channel = ctx.author.voice.channel
+            vc = await channel.connect()
         else:
             vc = client.voice_clients[0]
 
