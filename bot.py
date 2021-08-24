@@ -36,6 +36,7 @@ class Player():
                 description = '[Download]({0})'.format(api.streamSong(song.id).url)
             )
             embed.set_author(name='SubRift')
+            embed.set_footer(text=api.url)
             embed.set_thumbnail(url='https://cdn.discordapp.com/avatars/699752709028446259/df9496def162ef55bcaa9a2005c75ab2.png?size=256')
 
             #Check cover art
@@ -211,7 +212,7 @@ async def search(ctx, *, query):
             title = 'Search Results',
             color = discord.Color.orange()
         )
-        embed.set_footer(text='https://cptg.dev')
+        embed.set_footer(text=api.url)
         embed.set_author(name='SubRift')
         embed.set_thumbnail(url='https://cdn.discordapp.com/avatars/699752709028446259/df9496def162ef55bcaa9a2005c75ab2.png?size=256')
         
@@ -233,7 +234,7 @@ async def queue(ctx):
         title = 'Queue',
         color = discord.Color.orange()
     )
-    embed.set_footer(text='https://cptg.dev')
+    embed.set_footer(text=api.url)
     embed.set_author(name='SubRift')
     embed.set_thumbnail(url='https://cdn.discordapp.com/avatars/699752709028446259/df9496def162ef55bcaa9a2005c75ab2.png?size=256')
     
