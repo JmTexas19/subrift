@@ -7,8 +7,12 @@ Discord Music Bot that allows the user to play songs from a bot in Discord from 
 
 ```
 {
-"USER":"[Username]",
-"TOKEN":"[Bot Token]"
+    "USER":{
+        "USERNAME": "[Username]",
+        "SUBSONICPASSWORD": "[SubsonicPassword]"
+    },
+    "DISCORDTOKEN":"[DiscordBotToken]",
+    "URL":"[ServerUrl]"
 }
 ```
 Place `subrift.json` inside main folder.
