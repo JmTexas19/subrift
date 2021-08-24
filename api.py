@@ -326,7 +326,7 @@ def getSearchResults(query):
 #(binary) Returns a listing of songs in an album.
 def getAlbumData(id):
     #Test Request URL
-    URL = hostname + '/rest/getAlbum'
+    URL = url + '/rest/getAlbum'
 
     #Parameters
     PARAMS = {
