@@ -36,6 +36,7 @@ class Player():
                 description = '[Download]({0})'.format(api.streamSong(song.id).url)
             )
             embed.set_author(name='SubRift')
+            embed.set_footer(text=api.url)
             embed.set_thumbnail(url='https://cdn.discordapp.com/avatars/699752709028446259/df9496def162ef55bcaa9a2005c75ab2.png?size=256')
 
             #Check cover art
@@ -63,8 +64,7 @@ client = commands.Bot(command_prefix='s!')
 with open("subrift.json", "r") as read_file:
     data = json.load(read_file)
 
-HOSTNAME = data["SUBSONICSERVER"]["HOST"]
-TOKEN = data["USER"]["TOKEN"]
+TOKEN = data["DISCORDTOKEN"]
 
 #Logs Bot in
 @client.event
@@ -119,7 +119,8 @@ async def play(ctx, option: typing.Optional[int] = None, *, query):
     else:
         #Join channel if not already in one
         if not client.voice_clients:
-            vc = await ctx.author.voice.channel.connect()
+            channel = ctx.author.voice.channel
+            vc = await channel.connect()
         else:
             vc = client.voice_clients[0]
 
@@ -252,7 +253,7 @@ async def search(ctx, *, query):
             title = 'Search Results',
             color = discord.Color.orange()
         )
-        embed.set_footer(text=HOSTNAME)
+        embed.set_footer(text=api.url)
         embed.set_author(name='SubRift')
         embed.set_thumbnail(url='https://cdn.discordapp.com/avatars/699752709028446259/df9496def162ef55bcaa9a2005c75ab2.png?size=256')
 
@@ -274,7 +275,7 @@ async def queue(ctx):
         title = 'Queue',
         color = discord.Color.orange()
     )
-    embed.set_footer(text=HOSTNAME)
+    embed.set_footer(text=api.url)
     embed.set_author(name='SubRift')
     embed.set_thumbnail(url='https://cdn.discordapp.com/avatars/699752709028446259/df9496def162ef55bcaa9a2005c75ab2.png?size=256')
 
